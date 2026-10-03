@@ -1,8 +1,19 @@
+# Python
 __pycache__/
-*.pyc
-*.log
-.vscode/
+*.py[cod]
+*.egg-info/
+.venv/
 venv/
 env/
+
+# IDE
+.vscode/
+.idea/
+
+# SQLite / базы данных
 *.db
-credentials.txt
+*.sqlite
+*.sqlite3
+
+# Локальные файлы окружения
+.env
