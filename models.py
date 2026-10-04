@@ -1,4 +1,5 @@
 """Модели данных для проекта УП.02."""
+from datetime import datetime
 
 
 class Product:
@@ -13,42 +14,31 @@ class Product:
         self.quantity = quantity
         self.image = image
 
-    # Бизнес-логика 
-
     def total(self):
-        """Общая стоимость (цена × количество)."""
         return self.price * self.quantity
 
     def price_with_discount(self, discount_percent):
-        """Цена со скидкой (округление до 2 знаков)."""
         return round(self.price * (1 - discount_percent / 100), 2)
 
     def indicator(self):
-        """Индикатор остатка: много / мало / критично."""
         if self.quantity > 5:
             return "много"
         elif self.quantity > 3:
             return "мало"
         return "критично"
 
-    #  НОВЫЙ МЕТОД 
     def is_available(self):
-        """True, если товар есть в наличии (количество > 0)."""
         return self.quantity > 0
 
     def info(self):
-        """Строка с информацией о товаре."""
         return (
             f"[{self.id}] {self.name} {self.model} "
             f"(ОЗУ {self.ram} ГБ) — {self.price} руб. | "
             f"Остаток: {self.quantity} ({self.indicator()})"
         )
 
-    #  Служебные методы
-
     @classmethod
     def from_row(cls, row):
-        """Создаёт объект Product из строки БД."""
         return cls(
             product_id=row[0],
             name=row[1],
@@ -63,4 +53,61 @@ class Product:
         return self.info()
 
     def __repr__(self):
-        return f"Product(id={self.id}, name='{self.name}', model='{self.model}')"
+        return f"Product(id={self.id}, name='{self.name}')"
+
+
+# ЗАДАНИЕ 2: Класс Order 
+
+class Order:
+    """Класс Заказ."""
+
+    def __init__(self, order_id, date, client, product, quantity):
+        """
+        :param order_id: номер заказа
+        :param date: дата заказа (строка или datetime)
+        :param client: имя клиента
+        :param product: объект Product (или его id)
+        :param quantity: количество единиц товара
+        """
+        self.id = order_id
+        self.date = date
+        self.client = client
+        self.product = product          # объект Product
+        self.quantity = quantity
+
+    def total(self):
+        """Стоимость заказа (цена товара × количество)."""
+        return round(self.product.price * self.quantity, 2)
+
+    def total_with_discount(self, discount_percent):
+        """Стоимость заказа со скидкой."""
+        return round(self.product.price_with_discount(discount_percent) * self.quantity, 2)
+
+    def info(self):
+        """Строка с информацией о заказе."""
+        return (
+            f"Заказ №{self.id} от {self.date}: "
+            f"{self.client} — {self.product.name} × {self.quantity} = "
+            f"{self.total()} руб."
+        )
+
+    @classmethod
+    def from_row(cls, row, product=None):
+        """
+        Создаёт объект Order из строки БД.
+        :param row: кортеж из БД (id, дата, клиент, product_id, quantity)
+        :param product: объект Product, найденный по product_id (если None — id)
+        """
+        return cls(
+            order_id=row[0],
+            date=row[1],
+            client=row[2],
+            product=product if product is not None else row[3],  # объект или id
+            quantity=row[4],
+        )
+
+    def __str__(self):
+        return self.info()
+
+    def __repr__(self):
+        return f"Order(id={self.id}, client='{self.client}', qty={self.quantity})"
