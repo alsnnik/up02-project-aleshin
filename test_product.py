@@ -54,3 +54,29 @@ row_from_db = (4, "Corsair", "DDR5", 64, 25000, 7, "/img/corsair.jpg")
 p4 = Product.from_row(row_from_db)
 print(p4)
 print(f"Общая стоимость: {p4.total()} руб.")
+
+#  Тест 5: проверка is_available() 
+
+print("\n" + "=" * 60)
+print("ПРОВЕРКА is_available()")
+print("=" * 60)
+
+# Случай 1: товар есть в наличии
+p_yes = Product(10, "iPhone 15", "Смартфон", 8, 90000, 5)
+print(f"{p_yes.name}: quantity={p_yes.quantity} → is_available()={p_yes.is_available()}")
+# Ожидается: True
+
+# Случай 2: последняя штука
+p_last = Product(11, "Pixel 8", "Смартфон", 8, 70000, 1)
+print(f"{p_last.name}: quantity={p_last.quantity} → is_available()={p_last.is_available()}")
+# Ожидается: True
+
+# Случай 3: НЕТ в наличии
+p_no = Product(12, "Xiaomi 14", "Смартфон", 12, 85000, 0)
+print(f"{p_no.name}: quantity={p_no.quantity} → is_available()={p_no.is_available()}")
+# Ожидается: False
+
+# Случай 4: некорректные данные (отрицательное)
+p_bad = Product(13, "Тест", "Смартфон", 4, 10000, -3)
+print(f"{p_bad.name}: quantity={p_bad.quantity} → is_available()={p_bad.is_available()}")
+# Ожидается: False

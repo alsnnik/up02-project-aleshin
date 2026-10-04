@@ -5,17 +5,6 @@ class Product:
     """Класс Товар — соответствует таблице «Товар» в БД."""
 
     def __init__(self, product_id, name, model, ram, price, quantity, image=None):
-        """
-        Инициализация товара.
-
-        :param product_id: идентификатор (id)
-        :param name: название (брешь)
-        :param model: модель (модель)
-        :param ram: объём ОЗУ (озу)
-        :param price: цена (цена)
-        :param quantity: количество (количество)
-        :param image: путь к изображению (изображение)
-        """
         self.id = product_id
         self.name = name
         self.model = model
@@ -24,7 +13,7 @@ class Product:
         self.quantity = quantity
         self.image = image
 
-    #  Бизнес-логика 
+    # Бизнес-логика 
 
     def total(self):
         """Общая стоимость (цена × количество)."""
@@ -42,6 +31,11 @@ class Product:
             return "мало"
         return "критично"
 
+    #  НОВЫЙ МЕТОД 
+    def is_available(self):
+        """True, если товар есть в наличии (количество > 0)."""
+        return self.quantity > 0
+
     def info(self):
         """Строка с информацией о товаре."""
         return (
@@ -50,14 +44,11 @@ class Product:
             f"Остаток: {self.quantity} ({self.indicator()})"
         )
 
-    # Служебные методы 
+    #  Служебные методы
 
     @classmethod
     def from_row(cls, row):
-        """
-        Создаёт объект Product из строки БД (кортеж).
-        Удобно использовать при SELECT * FROM Товар.
-        """
+        """Создаёт объект Product из строки БД."""
         return cls(
             product_id=row[0],
             name=row[1],
