@@ -1,14 +1,14 @@
 # Проект УП.02
 
-**Автор: Алешин Николай Иванович
+Автор: Алешин Николай Иванович
 
-**Группа:** 3ИП-1-24
+Группа: 3ИП-1-24
 
-**GitHub:**  `alsnnik`
+GitHub: `alsnnik`
 
-**Репозиторий:** <https://github.com/alsnnik/up02-project-aleshin.git>
+Репозиторий: <https://github.com/alsnnik/up02-project-aleshin.git>
 
-**Дата:** 29.09.2026
+Дата: 29.09.2026
 
 ## Описание
 
