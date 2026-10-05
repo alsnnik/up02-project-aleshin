@@ -33,11 +33,7 @@ class Product:
         self.ram = ram
         self.model = model
 
-HEAD
-    #  Фабричный метод для БД 
-
-    # Фабричный метод для БД 
-conflict-test
+    # Фабричный метод для БД
     @classmethod
     def from_row(cls, row):
         """
@@ -53,11 +49,7 @@ conflict-test
             quantity=row[4],
         )
 
- HEAD
     # Базовые методы 
-
-    #  Базовые методы 
- conflict-test
     def total(self):
         """Общая стоимость позиции (цена × количество)."""
         return self.price * self.quantity
@@ -74,11 +66,7 @@ conflict-test
         """
         return self.quantity > 0
 
- HEAD
     # Методы расчёта скидки 
-
-    #  Методы расчёта скидки
- conflict-test
     def price_with_discount_auto(self, date=None):
         """
         Цена со скидкой по алгоритму ДЭ (из discount.py).
@@ -99,11 +87,7 @@ conflict-test
 
     def discounted_price(self):
         """Цена со скидкой 25% (упрощённо)."""
- HEAD
-        return self.price * 0.75
-
-        return self.price * 0.80   # изменено в ветке conflict-test
- conflict-test
+        return self.price * 0.90   # изменено в main
 
     # Информация о товаре 
     def info(self):
@@ -119,3 +103,20 @@ conflict-test
             f"{self.price} руб. × {self.quantity} = {self.total()} руб. "
             f"({self.indicator()})"
         )
+class Order:
+    """Класс Заказ."""
+
+    def __init__(self, order_id, client, date, total=0):
+        """
+        :param order_id: id заказа
+        :param client: имя клиента
+        :param date: дата заказа
+        :param total: сумма заказа
+        """
+        self.id = order_id
+        self.client = client
+        self.date = date
+        self.total = total
+
+    def order_info(self):
+        return f"Заказ №{self.id} от {self.date}: {self.client}"
