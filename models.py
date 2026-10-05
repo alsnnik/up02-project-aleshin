@@ -33,7 +33,11 @@ class Product:
         self.ram = ram
         self.model = model
 
+HEAD
     #  Фабричный метод для БД 
+
+    # Фабричный метод для БД 
+conflict-test
     @classmethod
     def from_row(cls, row):
         """
@@ -49,7 +53,11 @@ class Product:
             quantity=row[4],
         )
 
+ HEAD
     # Базовые методы 
+
+    #  Базовые методы 
+ conflict-test
     def total(self):
         """Общая стоимость позиции (цена × количество)."""
         return self.price * self.quantity
@@ -66,7 +74,11 @@ class Product:
         """
         return self.quantity > 0
 
+ HEAD
     # Методы расчёта скидки 
+
+    #  Методы расчёта скидки
+ conflict-test
     def price_with_discount_auto(self, date=None):
         """
         Цена со скидкой по алгоритму ДЭ (из discount.py).
@@ -87,7 +99,11 @@ class Product:
 
     def discounted_price(self):
         """Цена со скидкой 25% (упрощённо)."""
-        return self.price * 0.90
+ HEAD
+        return self.price * 0.75
+
+        return self.price * 0.80   # изменено в ветке conflict-test
+ conflict-test
 
     # Информация о товаре 
     def info(self):
