@@ -33,7 +33,7 @@ class Product:
         self.ram = ram
         self.model = model
 
-    # Фабричный метод для БД
+    # ========== Фабричный метод для БД ==========
     @classmethod
     def from_row(cls, row):
         """
@@ -49,7 +49,7 @@ class Product:
             quantity=row[4],
         )
 
-    # Базовые методы 
+    # ========== Базовые методы ==========
     def total(self):
         """Общая стоимость позиции (цена × количество)."""
         return self.price * self.quantity
@@ -59,14 +59,10 @@ class Product:
         return "много" if self.quantity > 5 else "мало"
 
     def is_available(self):
-        """
-        Есть ли товар в наличии.
-
-        :return: True, если quantity > 0
-        """
+        """Товар доступен для заказа?"""
         return self.quantity > 0
 
-    # Методы расчёта скидки 
+    # ========== Методы расчёта скидки ==========
     def price_with_discount_auto(self, date=None):
         """
         Цена со скидкой по алгоритму ДЭ (из discount.py).
@@ -89,7 +85,7 @@ class Product:
         """Цена со скидкой 25% (упрощённо)."""
         return self.price * 0.90   # изменено в main
 
-    # Информация о товаре 
+    # ========== Информация о товаре ==========
     def info(self):
         """Строка с полной информацией о товаре."""
         extra = ""
@@ -103,6 +99,8 @@ class Product:
             f"{self.price} руб. × {self.quantity} = {self.total()} руб. "
             f"({self.indicator()})"
         )
+
+
 class Order:
     """Класс Заказ."""
 
@@ -119,4 +117,5 @@ class Order:
         self.total = total
 
     def order_info(self):
+        """Строка с информацией о заказе."""
         return f"Заказ №{self.id} от {self.date}: {self.client}"
