@@ -85,6 +85,10 @@ class Product:
         """
         return self.price * (1 - percent / 100)
 
+    def discounted_price(self):
+        """Цена со скидкой 25% (упрощённо)."""
+        return self.price * 0.75
+
     # ========== Информация о товаре ==========
     def info(self):
         """Строка с полной информацией о товаре."""
