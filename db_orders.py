@@ -1,6 +1,6 @@
 """Загрузка заказов из БД в объекты класса Order."""
 import sqlite3
-from databases.config import DB_PATH
+from config import DB_PATH
 from models import Product, Order
 
 

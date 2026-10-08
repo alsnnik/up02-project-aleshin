@@ -74,4 +74,8 @@ def create_product_card(parent, product):
                            bg=bg_color)
     price_label.pack(side="bottom", anchor="e", fill="x")
 
+        # Разделитель снизу
+    separator = tk.Frame(card, height=1, bg="#CCCCCC")
+    separator.pack(side="bottom", fill="x", pady=(5, 0))
+    
     return card

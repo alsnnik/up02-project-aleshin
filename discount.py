@@ -1,7 +1,7 @@
 """Модуль расчёта скидки."""
 from datetime import datetime, timedelta
 import sqlite3
-from databases.config import DB_PATH
+from config import DB_PATH
 
 
 DISCOUNT_RATE = 0.25   # размер скидки: 25%

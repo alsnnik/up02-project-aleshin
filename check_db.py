@@ -1,6 +1,6 @@
 """Проверка содержимого БД: какие таблицы и данные есть."""
 import sqlite3
-from databases.config import DB_PATH
+from config import DB_PATH
 
 print("Путь к БД:", DB_PATH)
 
@@ -13,10 +13,21 @@ tables = cur.execute(
 ).fetchall()
 print("\nТаблицы:", tables)
 
+# Данные из таблицы Товар (для каталога)
+try:
+    rows = cur.execute("SELECT * FROM Товар").fetchall()
+    print(f"\nСодержимое таблицы Товар (всего записей: {len(rows)}):")
+    for row in rows:
+        print("  ", row)
+    if not rows:
+        print("   (пусто)")
+except sqlite3.OperationalError as e:
+    print("\nОшибка:", e)
+
 # Данные из таблицы Заказ
 try:
     rows = cur.execute("SELECT * FROM Заказ").fetchall()
-    print("\nСодержимое таблицы Заказ:")
+    print(f"\nСодержимое таблицы Заказ (всего записей: {len(rows)}):")
     for row in rows:
         print("  ", row)
     if not rows:
