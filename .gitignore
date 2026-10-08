@@ -48,3 +48,12 @@ credentials.txt
 
 # Локальные файлы окружения
 .env
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Excel временные файлы
+~$*.xlsx
+
+# SQLite journal
+*.db-journal
