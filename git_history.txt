@@ -1,0 +1,29 @@
+* b372116 Добавлен important.txt, лог и tmp проигнорированы
+* 96683de Добавлен .gitignore с правилами для Python
+* 4d141e5 ДЗ: работа с удалённым репозиторием
+*   82857f1 Разрешён конфликт в README.md
+|\  
+| * 5b8ed7b Update README.md
+| * 85fce07 Update README.md
+| * 44d1f57 Update README.md
+| * b876e00 Fix formatting and add GitHub version note
+| *   e2decbb Merge pull request #2 from alsnnik/feature/homework-8
+| |\  
+* | | cf80477 Изменение README локально
+|/ /  
+| | * e14965f Изменение README локально
+| |/  
+| * b1d9d4f Добавлен файл homework_info.txt
+|/  
+*   eb99cf1 Разрешён конфликт с GitHub
+|\  
+| * 0778b6c Update README.md
+* | f2ebe20 Локальное изменение README
+|/  
+*   e729b35 Merge pull request #1 from alsnnik/feature/remote-test
+|\  
+| * e178f52 Добавлен файл в ветке feature/remote-test
+|/  
+* 4d48b70 Fix formatting issue in README.md
+* 4ca1ee1 Update README with additional note
+* b1d0a2e Добавлен метод is_available
