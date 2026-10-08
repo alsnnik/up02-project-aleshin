@@ -33,7 +33,7 @@ class Product:
         self.ram = ram
         self.model = model
 
-    # ========== Фабричный метод для БД ==========
+    # Фабричный метод для БД
     @classmethod
     def from_row(cls, row):
         """
@@ -49,7 +49,7 @@ class Product:
             quantity=row[4],
         )
 
-    # ========== Базовые методы ==========
+    # Базовые методы
     def total(self):
         """Общая стоимость позиции (цена × количество)."""
         return self.price * self.quantity
@@ -62,7 +62,7 @@ class Product:
         """Товар доступен для заказа?"""
         return self.quantity > 0
 
-    # ========== Методы расчёта скидки ==========
+    #  Методы расчёта скидки 
     def price_with_discount_auto(self, date=None):
         """
         Цена со скидкой по алгоритму ДЭ (из discount.py).
@@ -85,7 +85,7 @@ class Product:
         """Цена со скидкой 25% (упрощённо)."""
         return self.price * 0.90   # изменено в main
 
-    # ========== Информация о товаре ==========
+    # Информация о товаре
     def info(self):
         """Строка с полной информацией о товаре."""
         extra = ""
