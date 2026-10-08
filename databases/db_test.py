@@ -7,17 +7,17 @@ def test_connection():
     """Проверка подключения к БД."""
     try:
         conn = sqlite3.connect(DB_PATH)
-        print(f"✅ Подключение к {DB_PATH} установлено")
+        print(f" Подключение к {DB_PATH} установлено")
 
         cur = conn.cursor()
         cur.execute("SELECT COUNT(*) FROM Товар")
         count = cur.fetchone()[0]
-        print(f"📦 Товаров в базе: {count}")
+        print(f" Товаров в базе: {count}")
 
         conn.close()
-        print("✅ Соединение закрыто")
+        print(" Соединение закрыто")
     except sqlite3.Error as e:
-        print(f"❌ Ошибка БД: {e}")
+        print(f" Ошибка БД: {e}")
 
 
 if __name__ == "__main__":
