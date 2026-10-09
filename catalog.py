@@ -1,10 +1,10 @@
 """Каталог товаров."""
 import tkinter as tk
 from tkinter import ttk
-from PIL import Image, ImageTk
-import os
 
 from config import COLOR_HIGHLIGHT, FONT_FAMILY
+from image_utils import load_image_proportional, get_product_image
+from resource_paths import PATH_LOGO, PATH_ICON
 import database as db
 
 
@@ -23,30 +23,26 @@ def create_product_card(parent, product):
     image_path = product[6]   # изображение
 
     # Фон: подсветка, если количество ≤3
-    bg_color = COLOR_HIGHLIGHT if qty <= 3 else "white"
+    bg_color = COLOR_HIGHLIGHT if qty <= 3 else "#FFFFFF"
 
     # Карточка — рамка со всех сторон
     card = tk.Frame(parent, bg=bg_color, bd=1, relief="solid")
     card.pack(fill="x", padx=10, pady=5)
 
-    # Изображение (слева) 
+    # === Изображение (слева) ===
     img_frame = tk.Frame(card, bg=bg_color)
     img_frame.pack(side="left", padx=10, pady=10)
 
-    if not image_path or not os.path.exists(image_path):
-        image_path = "resources/picture.png"
-
-    try:
-        img = Image.open(image_path).resize((100, 100))
-        photo = ImageTk.PhotoImage(img)
+    photo = get_product_image(image_path, size=(100, 100))
+    if photo:
         img_label = tk.Label(img_frame, image=photo, bg=bg_color)
         img_label.image = photo   # type: ignore  # сохраняем ссылку!
         img_label.pack()
-    except Exception:
-        tk.Label(img_frame, text="[ФОТО]", bg=bg_color,
+    else:
+        tk.Label(img_frame, text="[НЕТ ФОТО]", bg=bg_color,
                  width=10, height=5).pack()
 
-    # Текстовая часть (справа)
+    # === Текстовая часть (справа) ===
     text_frame = tk.Frame(card, bg=bg_color)
     text_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
@@ -64,18 +60,18 @@ def create_product_card(parent, product):
     tk.Label(text_frame, text=f"Количество: {indicator} ({qty})",
              font=(FONT_FAMILY, 11), bg=bg_color, anchor="w").pack(fill="x")
 
-    # Состав  →  озу (характеристика смартфона)
+    # Состав  →  озу
     tk.Label(text_frame, text=f"ОЗУ: {ram} ГБ",
              font=(FONT_FAMILY, 11), bg=bg_color, anchor="w").pack(fill="x")
 
-    # Цена (справа, внизу) 
+    # Цена (справа, внизу)
     price_label = tk.Label(text_frame, text=f"{price} руб.",
                            font=(FONT_FAMILY, 14, "bold"),
                            bg=bg_color)
     price_label.pack(side="bottom", anchor="e", fill="x")
 
-        # Разделитель снизу
+    # === Разделитель снизу ===
     separator = tk.Frame(card, height=1, bg="#CCCCCC")
     separator.pack(side="bottom", fill="x", pady=(5, 0))
-    
+
     return card
