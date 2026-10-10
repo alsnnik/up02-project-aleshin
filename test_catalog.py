@@ -71,7 +71,7 @@ def test_has_image():
 if __name__ == "__main__":
     print("--- test_fields ---")
     test_fields()
-    print("\n--- test_prices ---")
+    print("\n--- test_prices --")
     test_prices()
     print("\n--- test_quantities ---")
     test_quantities()

@@ -2,12 +2,14 @@
 import os
 
 # Путь к базе данных. 
-# Вариант 1 (проще, если запускаете из корня проекта):
 DB_PATH = "databases/db_variant_13.db"
 
-# Вариант 2 (надежнее, если запускаете из разных мест):
-# DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "databases", "db_variant_13.db")
 
+# Название компании-заказчика
+COMPANY_NAME = "ОбувьПлюс"
+
+# Заголовок приложения
+APP_TITLE = f"Система заказа — {COMPANY_NAME}"
 APP_TITLE = "Электроника — Каталог товаров"
 FONT_FAMILY = "Arial"
-COLOR_HIGHLIGHT = "#FFE4B5"
+COLOR_HIGHLIGHT = "#F44848" 

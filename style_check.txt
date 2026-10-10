@@ -1,0 +1,4 @@
+#FFFFFF — основной фон окна (COLOR_MAIN_BG, styles.py)
+#D2F6E7 — фон шапки каталога (COLOR_SECONDARY_BG, styles.py)
+#70B2AF — кнопки (COLOR_ACCENT, styles.py)
+#ff8080 — подсветка товаров с количеством ≤3 (COLOR_HIGHLIGHT, styles.py)

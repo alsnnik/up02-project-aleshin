@@ -13,26 +13,26 @@ tables = cur.execute(
 ).fetchall()
 print("\nТаблицы:", tables)
 
-# Данные из таблицы Товар (для каталога)
+# Данные из таблицы Товар
 try:
     rows = cur.execute("SELECT * FROM Товар").fetchall()
-    print(f"\nСодержимое таблицы Товар (всего записей: {len(rows)}):")
+    print(f"\n[Товар] Всего записей: {len(rows)}")
     for row in rows:
         print("  ", row)
     if not rows:
-        print("   (пусто)")
+        print("  (пусто)")
 except sqlite3.OperationalError as e:
-    print("\nОшибка:", e)
+    print(f"[Товар] Ошибка: {e}")
 
 # Данные из таблицы Заказ
 try:
     rows = cur.execute("SELECT * FROM Заказ").fetchall()
-    print(f"\nСодержимое таблицы Заказ (всего записей: {len(rows)}):")
+    print(f"\n[Заказ] Всего записей: {len(rows)}")
     for row in rows:
         print("  ", row)
     if not rows:
-        print("   (пусто)")
+        print("  (пусто)")
 except sqlite3.OperationalError as e:
-    print("\nОшибка:", e)
+    print(f"[Заказ] Ошибка: {e}")
 
 conn.close()

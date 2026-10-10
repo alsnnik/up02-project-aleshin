@@ -1,5 +1,6 @@
 """Обработчик ошибок приложения."""
 from tkinter import messagebox
+from typing import Tuple, Union
 
 
 def safe_call(func, *args, **kwargs):

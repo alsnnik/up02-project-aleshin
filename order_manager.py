@@ -67,3 +67,18 @@ def get_product_quantity(product_id):
     row = cur.fetchone()
     conn.close()
     return row[0] if row else 0
+
+def get_all_orders():
+    """Возвращает список всех заказов с названием товара."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT Заказ.id, Заказ.дата, Товар.наименование,
+               Заказ.количество
+        FROM Заказ
+        JOIN Товар ON Товар.id = Заказ.товар_id
+        ORDER BY Заказ.id DESC
+    """)
+    rows = cur.fetchall()
+    conn.close()
+    return rows

@@ -14,6 +14,9 @@ def test_color():
         (3, COLOR_HIGHLIGHT, "3 ≤ 3 (граница!)"),
         (2, COLOR_HIGHLIGHT, "2 ≤ 3"),
         (0, COLOR_HIGHLIGHT, "0 ≤ 3"),
+        # --- Дописанные 2 теста ---
+        (100, COLOR_MAIN_BG, "большое число"),
+        (-1, COLOR_HIGHLIGHT, "отрицательное"),
     ]
 
     print("=" * 60)
