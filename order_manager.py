@@ -170,3 +170,19 @@ def get_order_total(order_id):
     row = cur.fetchone()
     conn.close()
     return row[0] or 0.0
+
+def delete_order(order_id):
+    """Удаляет заказ и его состав."""
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM Состав_заказа WHERE заказ_id = ?", (order_id,))
+        cur.execute("DELETE FROM Заказ WHERE id = ?", (order_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Ошибка удаления: {e}")
+        return False
+    finally:
+        conn.close()
