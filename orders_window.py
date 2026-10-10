@@ -1,4 +1,4 @@
-"""Окно списка заказов для Менеджера."""
+"""Окно списка заказов."""
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -6,14 +6,15 @@ from styles import (
     COLOR_MAIN_BG, COLOR_SECONDARY_BG, COLOR_ACCENT,
     FONT_SIZE_NORMAL, FONT_SIZE_TITLE, font
 )
-from order_manager import get_all_orders
+from order_manager import get_all_orders, delete_order
 from error_handler import safe_call
 
 
 class OrdersWindow:
     """Окно списка заказов."""
 
-    def __init__(self, parent):
+    def __init__(self, parent, current_user=None):
+        self.current_user = current_user
         self.window = tk.Toplevel(parent)
         self.window.title("Список заказов")
         self.window.geometry("800x500")
@@ -50,11 +51,21 @@ class OrdersWindow:
                   bg=COLOR_ACCENT, fg="white",
                   font=font(FONT_SIZE_NORMAL),
                   padx=15, pady=5).pack(side="left", padx=20)
+
         tk.Button(btn_frame, text="Обновить",
                   command=self.load_orders,
                   bg=COLOR_ACCENT, fg="white",
                   font=font(FONT_SIZE_NORMAL),
                   padx=15, pady=5).pack(side="left", padx=10)
+
+        role = self.current_user[5] if self.current_user else None
+        if role == "Администратор":
+            tk.Button(btn_frame, text="Удалить заказ",
+                      command=self.delete_order,
+                      bg="red", fg="white",
+                      font=font(FONT_SIZE_NORMAL),
+                      padx=15, pady=5).pack(side="left", padx=10)
+
         tk.Button(btn_frame, text="Назад",
                   command=self.window.destroy,
                   bg=COLOR_ACCENT, fg="white",
@@ -66,7 +77,6 @@ class OrdersWindow:
             self.tree.delete(row)
         orders = safe_call(get_all_orders) or []
         for order in orders:
-            # order = (id, дата, клиент) — 3 поля
             self.tree.insert("", tk.END, values=order)
 
     def on_order_select(self, event=None):
@@ -78,3 +88,19 @@ class OrdersWindow:
         order_id = item["values"][0]
         from order_items_window import OrderItemsWindow
         OrderItemsWindow(self.window, order_id)
+
+    def delete_order(self):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning("Ошибка", "Выберите заказ")
+            return
+        item = self.tree.item(selected[0])
+        order_id = item["values"][0]
+        if not messagebox.askyesno("Подтверждение",
+                                   f"Удалить заказ №{order_id}?"):
+            return
+        if delete_order(order_id):
+            messagebox.showinfo("Успех", "Заказ удалён")
+            self.load_orders()
+        else:
+            messagebox.showerror("Ошибка", "Не удалось удалить заказ")
