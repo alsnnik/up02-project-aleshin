@@ -1,9 +1,10 @@
-"""Окно списка заказов (для Менеджера)."""
+"""Окно списка заказов для Менеджера."""
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from styles import (
-    COLOR_MAIN_BG, COLOR_SECONDARY_BG, FONT_SIZE_TITLE, font
+    COLOR_MAIN_BG, COLOR_SECONDARY_BG, COLOR_ACCENT,
+    FONT_SIZE_NORMAL, FONT_SIZE_TITLE, font
 )
 from order_manager import get_all_orders
 from error_handler import safe_call
@@ -18,6 +19,7 @@ class OrdersWindow:
         self.window.geometry("800x500")
         self.window.configure(bg=COLOR_MAIN_BG)
         self.build_ui()
+        self.load_orders()
 
     def build_ui(self):
         header = tk.Frame(self.window, bg=COLOR_SECONDARY_BG, height=60)
@@ -27,14 +29,52 @@ class OrdersWindow:
                  font=font(FONT_SIZE_TITLE, bold=True),
                  bg=COLOR_SECONDARY_BG).pack(pady=15)
 
-        columns = ("id", "дата", "клиент", "товар", "количество")
-        tree = ttk.Treeview(self.window, columns=columns, show="headings")
-        for col, title in zip(columns,
-                              ["ID", "Дата", "Клиент", "Товар", "Кол-во"]):
-            tree.heading(col, text=title)
-            tree.column(col, width=140)
-        tree.pack(fill="both", expand=True, padx=20, pady=20)
+        columns = ("id", "date", "client")
+        self.tree = ttk.Treeview(self.window, columns=columns,
+                                 show="headings", height=15)
+        self.tree.heading("id", text="№")
+        self.tree.heading("date", text="Дата")
+        self.tree.heading("client", text="Клиент")
+        self.tree.column("id", width=50, anchor="center")
+        self.tree.column("date", width=120, anchor="center")
+        self.tree.column("client", width=400, anchor="w")
+        self.tree.pack(fill="both", expand=True, padx=20, pady=20)
 
+        self.tree.bind("<Double-1>", self.on_order_select)
+
+        btn_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
+        btn_frame.pack(fill="x", pady=10)
+
+        tk.Button(btn_frame, text="Просмотр состава",
+                  command=self.on_order_select,
+                  bg=COLOR_ACCENT, fg="white",
+                  font=font(FONT_SIZE_NORMAL),
+                  padx=15, pady=5).pack(side="left", padx=20)
+        tk.Button(btn_frame, text="Обновить",
+                  command=self.load_orders,
+                  bg=COLOR_ACCENT, fg="white",
+                  font=font(FONT_SIZE_NORMAL),
+                  padx=15, pady=5).pack(side="left", padx=10)
+        tk.Button(btn_frame, text="Назад",
+                  command=self.window.destroy,
+                  bg=COLOR_ACCENT, fg="white",
+                  font=font(FONT_SIZE_NORMAL),
+                  padx=15, pady=5).pack(side="right", padx=20)
+
+    def load_orders(self):
+        for row in self.tree.get_children():
+            self.tree.delete(row)
         orders = safe_call(get_all_orders) or []
-        for row in orders:
-            tree.insert("", "end", values=row)
+        for order in orders:
+            # order = (id, дата, клиент) — 3 поля
+            self.tree.insert("", tk.END, values=order)
+
+    def on_order_select(self, event=None):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning("Ошибка", "Выберите заказ")
+            return
+        item = self.tree.item(selected[0])
+        order_id = item["values"][0]
+        from order_items_window import OrderItemsWindow
+        OrderItemsWindow(self.window, order_id)

@@ -34,7 +34,7 @@ class CatalogWindow:
                  bg=COLOR_SECONDARY_BG).pack(side="left", padx=20, pady=20)
 
         # Кнопка «Список заказов»
-        tk.Button(header, text="Список заказов",
+        tk.Button(header, text=" Заказы",
                   command=self.open_orders,
                   bg=COLOR_ACCENT, fg="white",
                   font=font(FONT_SIZE_NORMAL),
