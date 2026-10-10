@@ -4,6 +4,7 @@ from config import DB_PATH
 from models import Product
 
 
+
 # Базовые функции
 
 def get_all_products():
@@ -100,3 +101,18 @@ if __name__ == "__main__":
         get_products_low_stock(),
         title="НИЗКИЙ ОСТАТОК"
     )
+import sqlite3
+from config import DB_PATH
+
+
+def get_product_sizes(product_id):
+    """Возвращает список размеров для товара."""
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT DISTINCT размер FROM Товар WHERE id = ?", (product_id,))
+        rows = cur.fetchall()
+    except sqlite3.OperationalError:
+        rows = []
+    conn.close()
+    return [row[0] for row in rows if row[0]]

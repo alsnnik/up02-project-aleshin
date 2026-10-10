@@ -1,6 +1,6 @@
 """Форма просмотра товара."""
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 from styles import (
     COLOR_MAIN_BG, COLOR_SECONDARY_BG, COLOR_ACCENT,
@@ -53,13 +53,32 @@ class ViewForm:
         self._add_field(info_frame, "Количество", self.product[5])
 
         qty_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
-        qty_frame.pack(fill="x", padx=20, pady=5)
-        tk.Label(qty_frame, text="Количество для заказа:",
-                 font=font(FONT_SIZE_NORMAL, bold=True),
-                 bg=COLOR_MAIN_BG).pack(side="left")
-        self.qty_entry = tk.Entry(qty_frame, font=font(FONT_SIZE_NORMAL), width=6)
-        self.qty_entry.insert(0, "1")
-        self.qty_entry.pack(side="left", padx=5)
+        qty_frame.pack(fill="x", padx=20, pady=10)
+        tk.Label(qty_frame, text="Количество:",
+                 font=font(FONT_SIZE_NORMAL),
+                 bg=COLOR_MAIN_BG).pack(side="left", padx=5)
+        self.qty_var = tk.StringVar(value="1")
+        qty_entry = tk.Entry(qty_frame, textvariable=self.qty_var, width=5,
+                             font=font(FONT_SIZE_NORMAL))
+        qty_entry.pack(side="left", padx=5)
+
+        size_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
+        size_frame.pack(fill="x", padx=20, pady=10)
+        tk.Label(size_frame, text="Размер:",
+                 font=font(FONT_SIZE_NORMAL),
+                 bg=COLOR_MAIN_BG).pack(side="left", padx=5)
+        try:
+            from db_products import get_product_sizes
+            sizes = get_product_sizes(self.product[0])
+        except Exception:
+            sizes = []
+        if not sizes:
+            sizes = ["—"]
+        self.size_var = tk.StringVar(value=sizes[0])
+        size_combo = ttk.Combobox(size_frame, textvariable=self.size_var,
+                                  values=sizes, state="readonly", width=5,
+                                  font=font(FONT_SIZE_NORMAL))
+        size_combo.pack(side="left", padx=5)
 
         btn_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         btn_frame.pack(fill="x", pady=10)
@@ -89,30 +108,31 @@ class ViewForm:
             messagebox.showerror("Ошибка", "Товар не выбран")
             return
 
-        ok, result = validate_positive_int(self.qty_entry.get(), "Количество")
+        ok, result = validate_positive_int(self.qty_var.get(), "Количество")
         if not ok:
             messagebox.showwarning("Ошибка ввода", str(result))
             return
 
         qty = int(result)  # type: ignore[arg-type]
 
+        current_qty = int(get_product_quantity(self.product[0]))
+        if qty > current_qty:
+            messagebox.showwarning("Ошибка",
+                                   f"Доступно только {current_qty} шт.")
+            return
+
         try:
-            product_id = self.product[0]
-            current_qty = int(get_product_quantity(product_id))
-
-            if current_qty < qty:
-                messagebox.showwarning("Ошибка", "Недостаточно товара на складе")
-                return
-
+            add_order_to_db("Иванов Иван Иванович", self.product[0], qty)
             new_qty = current_qty - qty
-            add_order_to_db("Иванов Иван Иванович", product_id, qty)
-            update_product_quantity(product_id, new_qty)
+            update_product_quantity(self.product[0], new_qty)
 
-            messagebox.showinfo("Успех", f"Заказ оформлен ({qty} шт.)")
+            messagebox.showinfo("Успех", f"Товар добавлен в заказ ({qty} шт.)")
 
             if self.on_add_to_order:
                 self.on_add_to_order()
 
+            self.window.destroy()
+
         except Exception as e:
             messagebox.showerror("Ошибка заказа",
-                                 f"Не удалось оформить заказ:\n{e}")
+                                 f"Не удалось добавить товар:\n{e}")
