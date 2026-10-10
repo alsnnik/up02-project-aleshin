@@ -8,14 +8,12 @@ from styles import (
 )
 from image_utils import get_product_image
 from error_handler import safe_call, validate_positive_int
-from order_manager import (
-    add_order_to_db,
-    update_product_quantity,
-    get_product_quantity
-)
+from order_manager import get_product_quantity
 
 
 class ViewForm:
+    """Форма просмотра выбранного товара."""
+
     def __init__(self, parent, product, on_add_to_order=None):
         self.product = product
         self.on_add_to_order = on_add_to_order
@@ -26,6 +24,8 @@ class ViewForm:
         self.build_ui()
 
     def build_ui(self):
+        """Строит интерфейс формы."""
+        # Шапка
         header = tk.Frame(self.window, bg=COLOR_SECONDARY_BG, height=60)
         header.pack(fill="x")
         header.pack_propagate(False)
@@ -33,9 +33,11 @@ class ViewForm:
                  font=font(FONT_SIZE_TITLE, bold=True),
                  bg=COLOR_SECONDARY_BG).pack(pady=15)
 
+        # Основная область
         main = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         main.pack(fill="both", expand=True, padx=20, pady=20)
 
+        # Изображение
         img_frame = tk.Frame(main, bg=COLOR_MAIN_BG)
         img_frame.pack(side="left", padx=10)
         photo = safe_call(get_product_image, self.product[6], size=(200, 200))
@@ -44,6 +46,7 @@ class ViewForm:
             lbl.image = photo  # type: ignore[attr-defined]
             lbl.pack()
 
+        # Информация о товаре
         info_frame = tk.Frame(main, bg=COLOR_MAIN_BG)
         info_frame.pack(side="left", fill="both", expand=True, padx=20)
         self._add_field(info_frame, "Производство", self.product[1])
@@ -52,34 +55,17 @@ class ViewForm:
         self._add_field(info_frame, "Цена", f"{self.product[4]} руб.")
         self._add_field(info_frame, "Количество", self.product[5])
 
+        # Поле ввода количества
         qty_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
-        qty_frame.pack(fill="x", padx=20, pady=10)
-        tk.Label(qty_frame, text="Количество:",
-                 font=font(FONT_SIZE_NORMAL),
-                 bg=COLOR_MAIN_BG).pack(side="left", padx=5)
+        qty_frame.pack(fill="x", padx=20, pady=5)
+        tk.Label(qty_frame, text="Количество для заказа:",
+                 font=font(FONT_SIZE_NORMAL, bold=True),
+                 bg=COLOR_MAIN_BG).pack(side="left")
         self.qty_var = tk.StringVar(value="1")
-        qty_entry = tk.Entry(qty_frame, textvariable=self.qty_var, width=5,
-                             font=font(FONT_SIZE_NORMAL))
-        qty_entry.pack(side="left", padx=5)
+        tk.Entry(qty_frame, textvariable=self.qty_var, width=6,
+                 font=font(FONT_SIZE_NORMAL)).pack(side="left", padx=5)
 
-        size_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
-        size_frame.pack(fill="x", padx=20, pady=10)
-        tk.Label(size_frame, text="Размер:",
-                 font=font(FONT_SIZE_NORMAL),
-                 bg=COLOR_MAIN_BG).pack(side="left", padx=5)
-        try:
-            from db_products import get_product_sizes
-            sizes = get_product_sizes(self.product[0])
-        except Exception:
-            sizes = []
-        if not sizes:
-            sizes = ["—"]
-        self.size_var = tk.StringVar(value=sizes[0])
-        size_combo = ttk.Combobox(size_frame, textvariable=self.size_var,
-                                  values=sizes, state="readonly", width=5,
-                                  font=font(FONT_SIZE_NORMAL))
-        size_combo.pack(side="left", padx=5)
-
+        # Кнопки
         btn_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         btn_frame.pack(fill="x", pady=10)
         tk.Button(btn_frame, text="Добавить в заказ",
@@ -94,6 +80,7 @@ class ViewForm:
                   padx=15, pady=5).pack(side="right", padx=20)
 
     def _add_field(self, parent, label, value):
+        """Добавляет поле в форму."""
         row = tk.Frame(parent, bg=COLOR_MAIN_BG)
         row.pack(fill="x", pady=2)
         tk.Label(row, text=f"{label}:",
@@ -104,35 +91,39 @@ class ViewForm:
                  bg=COLOR_MAIN_BG, anchor="w").pack(side="left")
 
     def add_to_order(self):
+        """Обработчик кнопки «Добавить в заказ»."""
         if not self.product:
             messagebox.showerror("Ошибка", "Товар не выбран")
             return
 
+        # Валидация количества
         ok, result = validate_positive_int(self.qty_var.get(), "Количество")
         if not ok:
             messagebox.showwarning("Ошибка ввода", str(result))
             return
-
         qty = int(result)  # type: ignore[arg-type]
 
-        current_qty = int(get_product_quantity(self.product[0]))
+        # Проверка остатка
+        product_id = self.product[0]
+        current_qty = int(get_product_quantity(product_id))
         if qty > current_qty:
             messagebox.showwarning("Ошибка",
                                    f"Доступно только {current_qty} шт.")
             return
 
+        # Оформляем заказ через create_order
         try:
-            add_order_to_db("Иванов Иван Иванович", self.product[0], qty)
-            new_qty = current_qty - qty
-            update_product_quantity(self.product[0], new_qty)
+            from order_manager import create_order
+            items = [(product_id, "—", qty, float(self.product[4]))]
+            order_id = create_order("Иванов Иван Иванович", items)
 
-            messagebox.showinfo("Успех", f"Товар добавлен в заказ ({qty} шт.)")
-
-            if self.on_add_to_order:
-                self.on_add_to_order()
-
-            self.window.destroy()
-
+            if order_id:
+                messagebox.showinfo("Успех",
+                                    f"Заказ №{order_id} оформлен ({qty} шт.)")
+                if self.on_add_to_order:
+                    self.on_add_to_order()
+                self.window.destroy()
+            else:
+                messagebox.showerror("Ошибка", "Не удалось создать заказ")
         except Exception as e:
-            messagebox.showerror("Ошибка заказа",
-                                 f"Не удалось добавить товар:\n{e}")
+            messagebox.showerror("Ошибка заказа", str(e))

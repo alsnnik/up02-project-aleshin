@@ -1,38 +1,27 @@
-"""Проверка содержимого БД: какие таблицы и данные есть."""
+"""Проверка содержимого БД."""
 import sqlite3
 from config import DB_PATH
-
-print("Путь к БД:", DB_PATH)
 
 conn = sqlite3.connect(DB_PATH)
 cur = conn.cursor()
 
-# Все таблицы в БД
-tables = cur.execute(
-    "SELECT name FROM sqlite_master WHERE type='table'"
-).fetchall()
-print("\nТаблицы:", tables)
+# Список таблиц
+cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+print("Таблицы:", [r[0] for r in cur.fetchall()])
 
-# Данные из таблицы Товар
-try:
-    rows = cur.execute("SELECT * FROM Товар").fetchall()
-    print(f"\n[Товар] Всего записей: {len(rows)}")
-    for row in rows:
-        print("  ", row)
-    if not rows:
-        print("  (пусто)")
-except sqlite3.OperationalError as e:
-    print(f"[Товар] Ошибка: {e}")
+# Заказы
+print("\n[Заказ]")
+for r in cur.execute("SELECT * FROM Заказ"):
+    print(" ", r)
 
-# Данные из таблицы Заказ
-try:
-    rows = cur.execute("SELECT * FROM Заказ").fetchall()
-    print(f"\n[Заказ] Всего записей: {len(rows)}")
-    for row in rows:
-        print("  ", row)
-    if not rows:
-        print("  (пусто)")
-except sqlite3.OperationalError as e:
-    print(f"[Заказ] Ошибка: {e}")
+# Позиции
+print("\n[Состав_заказа]")
+for r in cur.execute("SELECT * FROM Состав_заказа"):
+    print(" ", r)
+
+# Остатки
+print("\n[Товар]")
+for r in cur.execute("SELECT id, модель, количество FROM Товар"):
+    print(" ", r)
 
 conn.close()
