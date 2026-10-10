@@ -14,7 +14,7 @@ def create_product_card(parent, product):
     """Создаёт карточку товара по макету.
     Вариант 13 «Смартфоны»: id, бренд, модель, озу, цена, количество, изображение.
     """
-    qty = product[5]                        # количество 
+    qty = product[5]
     bg_color = _get_card_color(qty)
 
     card = tk.Frame(parent, bg=bg_color, bd=1, relief="solid")
@@ -23,8 +23,23 @@ def create_product_card(parent, product):
     _add_image(card, product, bg_color)
     _add_text_info(card, product, bg_color, qty)
 
+    # Привязка клика ко всем вложенным элементам карточки
+    _bind_recursive(card, parent, product)
+
     return card
 
+
+def _bind_recursive(widget, parent, product):
+    """Рекурсивно привязывает клик ко всем дочерним виджетам."""
+    widget.bind("<Button-1>", lambda e, p=product: _open_view(parent, p))
+    for child in widget.winfo_children():
+        _bind_recursive(child, parent, product)
+
+
+def _open_view(parent, product):
+    """Открывает форму просмотра товара."""
+    from view_form import ViewForm
+    ViewForm(parent, product)
 
 def _get_card_color(qty):
     """Возвращает цвет фона карточки (подсветка при qty <= 3)."""
@@ -88,7 +103,11 @@ def _indicator(qty):
     """
     Индикатор «много/мало» (порог 5 по КИМ).
 
-    :param qty: количество товара
+    :param qty: количество товара (число, строка или None)
     :return: «много» или «мало»
     """
+    try:
+        qty = float(qty)   # приводим к числу (работает и для "10", и для 0.5)
+    except (TypeError, ValueError):
+        return "мало"      # при None или мусоре — «мало»
     return "много" if qty > 5 else "мало"
