@@ -82,3 +82,41 @@ def get_all_orders():
     rows = cur.fetchall()
     conn.close()
     return rows
+
+def create_order(client):
+    """Создаёт пустой заказ, возвращает его id."""
+    conn = get_connection()
+    cur = conn.cursor()
+    date = datetime.now().strftime("%Y-%m-%d")
+    cur.execute("INSERT INTO Заказ (дата, клиент) VALUES (?, ?)", (date, client))
+    conn.commit()
+    order_id = cur.lastrowid
+    conn.close()
+    return order_id
+
+
+def add_order_item(order_id, product_id, quantity):
+    """Добавляет позицию в заказ."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO ПозицияЗаказа (заказ_id, товар_id, количество) VALUES (?, ?, ?)",
+        (order_id, product_id, quantity)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_order_items(order_id):
+    """Возвращает позиции заказа с названиями товаров."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT Товар.наименование, ПозицияЗаказа.количество, Товар.цена
+        FROM ПозицияЗаказа
+        JOIN Товар ON Товар.id = ПозицияЗаказа.товар_id
+        WHERE ПозицияЗаказа.заказ_id = ?
+    """, (order_id,))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
