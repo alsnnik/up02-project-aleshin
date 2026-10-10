@@ -5,12 +5,10 @@ from config import DB_PATH
 
 
 def get_connection():
-    """Соединение с БД."""
     return sqlite3.connect(DB_PATH)
 
 
 def add_order_to_db(client, product_id, quantity):
-    """Добавляет новый заказ в БД."""
     conn = get_connection()
     try:
         cur = conn.cursor()
@@ -29,14 +27,11 @@ def add_order_to_db(client, product_id, quantity):
 
 
 def update_product_quantity(product_id, new_quantity):
-    """Обновляет количество товара в БД."""
     conn = get_connection()
     try:
         cur = conn.cursor()
-        cur.execute(
-            "UPDATE Товар SET количество = ? WHERE id = ?",
-            (new_quantity, product_id)
-        )
+        cur.execute("UPDATE Товар SET количество = ? WHERE id = ?",
+                    (new_quantity, product_id))
         conn.commit()
     except sqlite3.Error as e:
         print(f"Ошибка обновления количества: {e}")
@@ -44,8 +39,64 @@ def update_product_quantity(product_id, new_quantity):
         conn.close()
 
 
+def decrease_product_quantity(product_id, quantity):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT количество FROM Товар WHERE id = ?", (product_id,))
+        row = cur.fetchone()
+        if not row:
+            return False
+        if row[0] < quantity:
+            return False
+        cur.execute(
+            "UPDATE Товар SET количество = количество - ? WHERE id = ?",
+            (quantity, product_id)
+        )
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Ошибка уменьшения количества: {e}")
+        return False
+    finally:
+        conn.close()
+
+
+def create_order(client, items):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        date = datetime.now().strftime("%Y-%m-%d")
+        cur.execute("INSERT INTO Заказ (дата, клиент) VALUES (?, ?)",
+                    (date, client))
+        order_id = cur.lastrowid
+        for product_id, size, quantity, price in items:
+            cur.execute("SELECT количество FROM Товар WHERE id = ?", (product_id,))
+            row = cur.fetchone()
+            if not row or row[0] < quantity:
+                raise ValueError(f"Недостаточно товара id={product_id}")
+            cur.execute(
+                "INSERT INTO Состав_заказа "
+                "(заказ_id, товар_id, размер, количество, цена) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (order_id, product_id, size, quantity, price)
+            )
+            cur.execute(
+                "UPDATE Товар SET количество = количество - ? WHERE id = ?",
+                (quantity, product_id)
+            )
+        conn.commit()
+        return order_id
+    except Exception as e:
+        conn.rollback()
+        print(f"Ошибка создания заказа: {e}")
+        return None
+    finally:
+        conn.close()
+
+
 def get_last_order_id():
-    """Возвращает id последнего заказа."""
     conn = get_connection()
     try:
         cur = conn.cursor()
@@ -60,7 +111,6 @@ def get_last_order_id():
 
 
 def get_product_quantity(product_id):
-    """Возвращает количество товара по id."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT количество FROM Товар WHERE id = ?", (product_id,))
@@ -68,8 +118,8 @@ def get_product_quantity(product_id):
     conn.close()
     return row[0] if row else 0
 
+
 def get_all_orders():
-    """Возвращает список всех заказов с названием товара."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
@@ -79,44 +129,6 @@ def get_all_orders():
         JOIN Товар ON Товар.id = Заказ.товар_id
         ORDER BY Заказ.id DESC
     """)
-    rows = cur.fetchall()
-    conn.close()
-    return rows
-
-def create_order(client):
-    """Создаёт пустой заказ, возвращает его id."""
-    conn = get_connection()
-    cur = conn.cursor()
-    date = datetime.now().strftime("%Y-%m-%d")
-    cur.execute("INSERT INTO Заказ (дата, клиент) VALUES (?, ?)", (date, client))
-    conn.commit()
-    order_id = cur.lastrowid
-    conn.close()
-    return order_id
-
-
-def add_order_item(order_id, product_id, quantity):
-    """Добавляет позицию в заказ."""
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO ПозицияЗаказа (заказ_id, товар_id, количество) VALUES (?, ?, ?)",
-        (order_id, product_id, quantity)
-    )
-    conn.commit()
-    conn.close()
-
-
-def get_order_items(order_id):
-    """Возвращает позиции заказа с названиями товаров."""
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT Товар.наименование, ПозицияЗаказа.количество, Товар.цена
-        FROM ПозицияЗаказа
-        JOIN Товар ON Товар.id = ПозицияЗаказа.товар_id
-        WHERE ПозицияЗаказа.заказ_id = ?
-    """, (order_id,))
     rows = cur.fetchall()
     conn.close()
     return rows
