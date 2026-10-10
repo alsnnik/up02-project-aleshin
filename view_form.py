@@ -7,11 +7,15 @@ from styles import (
     FONT_SIZE_NORMAL, FONT_SIZE_TITLE, font
 )
 from image_utils import get_product_image
+from error_handler import safe_call, validate_positive_int
+from order_manager import (
+    add_order_to_db,
+    update_product_quantity,
+    get_product_quantity
+)
 
 
 class ViewForm:
-    """Форма просмотра выбранного товара."""
-
     def __init__(self, parent, product, on_add_to_order=None):
         self.product = product
         self.on_add_to_order = on_add_to_order
@@ -34,10 +38,10 @@ class ViewForm:
 
         img_frame = tk.Frame(main, bg=COLOR_MAIN_BG)
         img_frame.pack(side="left", padx=10)
-        photo = get_product_image(self.product[6], size=(200, 200))
+        photo = safe_call(get_product_image, self.product[6], size=(200, 200))
         if photo:
             lbl = tk.Label(img_frame, image=photo, bg=COLOR_MAIN_BG)
-            lbl.image = photo
+            lbl.image = photo  # type: ignore[attr-defined]
             lbl.pack()
 
         info_frame = tk.Frame(main, bg=COLOR_MAIN_BG)
@@ -47,6 +51,15 @@ class ViewForm:
         self._add_field(info_frame, "ОЗУ", f"{self.product[3]} ГБ")
         self._add_field(info_frame, "Цена", f"{self.product[4]} руб.")
         self._add_field(info_frame, "Количество", self.product[5])
+
+        qty_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
+        qty_frame.pack(fill="x", padx=20, pady=5)
+        tk.Label(qty_frame, text="Количество для заказа:",
+                 font=font(FONT_SIZE_NORMAL, bold=True),
+                 bg=COLOR_MAIN_BG).pack(side="left")
+        self.qty_entry = tk.Entry(qty_frame, font=font(FONT_SIZE_NORMAL), width=6)
+        self.qty_entry.insert(0, "1")
+        self.qty_entry.pack(side="left", padx=5)
 
         btn_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         btn_frame.pack(fill="x", pady=10)
@@ -72,14 +85,34 @@ class ViewForm:
                  bg=COLOR_MAIN_BG, anchor="w").pack(side="left")
 
     def add_to_order(self):
-        if not self.on_add_to_order:
-            messagebox.showinfo("Информация", "Функция в разработке")
-            return
         if not self.product:
             messagebox.showerror("Ошибка", "Товар не выбран")
             return
+
+        ok, result = validate_positive_int(self.qty_entry.get(), "Количество")
+        if not ok:
+            messagebox.showwarning("Ошибка ввода", str(result))
+            return
+
+        qty = int(result)  # type: ignore[arg-type]
+
         try:
-            self.on_add_to_order(self.product)
-            messagebox.showinfo("Успех", "Товар добавлен в заказ")
+            product_id = self.product[0]
+            current_qty = int(get_product_quantity(product_id))
+
+            if current_qty < qty:
+                messagebox.showwarning("Ошибка", "Недостаточно товара на складе")
+                return
+
+            new_qty = current_qty - qty
+            add_order_to_db("Иванов Иван Иванович", product_id, qty)
+            update_product_quantity(product_id, new_qty)
+
+            messagebox.showinfo("Успех", f"Заказ оформлен ({qty} шт.)")
+
+            if self.on_add_to_order:
+                self.on_add_to_order()
+
         except Exception as e:
-            messagebox.showerror("Ошибка заказа", f"Не удалось добавить товар:\n{e}")
+            messagebox.showerror("Ошибка заказа",
+                                 f"Не удалось оформить заказ:\n{e}")
