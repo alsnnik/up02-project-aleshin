@@ -6,8 +6,7 @@ from styles import (
     COLOR_MAIN_BG, COLOR_SECONDARY_BG, COLOR_ACCENT,
     FONT_SIZE_NORMAL, FONT_SIZE_TITLE, font
 )
-from order_manager import get_order_items
-from error_handler import safe_call
+import order_manager as om
 
 
 class OrderItemsWindow:
@@ -17,7 +16,7 @@ class OrderItemsWindow:
         self.order_id = order_id
         self.window = tk.Toplevel(parent)
         self.window.title(f"Состав заказа №{order_id}")
-        self.window.geometry("700x400")
+        self.window.geometry("850x500")
         self.window.configure(bg=COLOR_MAIN_BG)
         self.build_ui()
         self.load_items()
@@ -30,15 +29,18 @@ class OrderItemsWindow:
                  font=font(FONT_SIZE_TITLE, bold=True),
                  bg=COLOR_SECONDARY_BG).pack(pady=15)
 
-        columns = ("name", "size", "quantity", "price", "total")
+        columns = ("name", "production", "size",
+                   "quantity", "price", "total")
         self.tree = ttk.Treeview(self.window, columns=columns,
-                                 show="headings", height=10)
+                                 show="headings", height=12)
         self.tree.heading("name", text="Товар")
+        self.tree.heading("production", text="Производство")
         self.tree.heading("size", text="Размер")
         self.tree.heading("quantity", text="Кол-во")
         self.tree.heading("price", text="Цена")
         self.tree.heading("total", text="Сумма")
-        self.tree.column("name", width=250, anchor="w")
+        self.tree.column("name", width=200, anchor="w")
+        self.tree.column("production", width=120, anchor="w")
         self.tree.column("size", width=70, anchor="center")
         self.tree.column("quantity", width=70, anchor="center")
         self.tree.column("price", width=100, anchor="e")
@@ -47,11 +49,17 @@ class OrderItemsWindow:
 
         self.total_label = tk.Label(self.window, text="",
                                     font=font(FONT_SIZE_NORMAL, bold=True),
+                                    fg=COLOR_ACCENT,
                                     bg=COLOR_MAIN_BG)
-        self.total_label.pack(pady=5)
+        self.total_label.pack(pady=10)
 
         btn_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         btn_frame.pack(fill="x", pady=10)
+        tk.Button(btn_frame, text="Обновить",
+                  command=self.load_items,
+                  bg=COLOR_ACCENT, fg="white",
+                  font=font(FONT_SIZE_NORMAL),
+                  padx=15, pady=5).pack(side="left", padx=20)
         tk.Button(btn_frame, text="Назад",
                   command=self.window.destroy,
                   bg=COLOR_ACCENT, fg="white",
@@ -62,16 +70,30 @@ class OrderItemsWindow:
         for row in self.tree.get_children():
             self.tree.delete(row)
 
-        items = safe_call(get_order_items, self.order_id) or []
-        total = 0.0
+        try:
+            items = om.get_order_items(self.order_id)
 
-        for item in items:
-            # item = (id, name, size, quantity, price)
-            _, name, size, quantity, price = item
-            item_total = quantity * price
-            total += item_total
-            self.tree.insert("", tk.END,
-                             values=(name, size, quantity,
-                                     f"{price:.2f}", f"{item_total:.2f}"))
+            if not items:
+                messagebox.showinfo("Информация", "Заказ пуст")
+                return
 
-        self.total_label.config(text=f"Итого: {total:.2f} руб.")
+            for item in items:
+                name = item[1]
+                production = item[2]
+                size = item[3]
+                quantity = item[4]
+                price = item[5]
+                item_total = quantity * price
+                self.tree.insert("", tk.END,
+                                 values=(name, production, size,
+                                         quantity,
+                                         f"{price:.2f}",
+                                         f"{item_total:.2f}"))
+
+            total = om.get_order_total(self.order_id)
+            self.total_label.config(
+                text=f"ИТОГО ПО ЗАКАЗУ: {total:.2f} руб."
+            )
+        except Exception as e:
+            messagebox.showerror("Ошибка",
+                                 f"Не удалось загрузить состав:\n{e}")
