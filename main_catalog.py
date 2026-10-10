@@ -4,7 +4,7 @@ import tkinter as tk
 import database as db
 from styles import (
     COLOR_MAIN_BG, COLOR_SECONDARY_BG, COLOR_ACCENT,
-    FONT_SIZE_HEADER, FONT_SIZE_TITLE, font
+    FONT_SIZE_NORMAL, FONT_SIZE_TITLE, font
 )
 from catalog import create_product_card
 from error_handler import safe_call
@@ -31,7 +31,14 @@ class CatalogWindow:
 
         tk.Label(header, text="Каталог товаров",
                  font=font(FONT_SIZE_TITLE, bold=True),
-                 bg=COLOR_SECONDARY_BG).pack(pady=20)
+                 bg=COLOR_SECONDARY_BG).pack(side="left", padx=20, pady=20)
+
+        # Кнопка «Список заказов»
+        tk.Button(header, text="Список заказов",
+                  command=self.open_orders,
+                  bg=COLOR_ACCENT, fg="white",
+                  font=font(FONT_SIZE_NORMAL),
+                  padx=10, pady=5).pack(side="right", padx=20)
 
         # Область с прокруткой
         container = tk.Frame(self.root, bg=COLOR_MAIN_BG)
@@ -64,6 +71,11 @@ class CatalogWindow:
         for widget in self.catalog_frame.winfo_children():
             widget.destroy()
         self.load_products()
+
+    def open_orders(self):
+        """Открывает окно списка заказов."""
+        from orders_window import OrdersWindow
+        OrdersWindow(self.root)
 
     def run(self):
         """Запускает главный цикл."""

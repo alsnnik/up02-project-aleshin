@@ -120,13 +120,15 @@ def get_product_quantity(product_id):
 
 
 def get_all_orders():
+    """Возвращает список всех заказов с названием товара."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT Заказ.id, Заказ.дата, Товар.наименование,
-               Заказ.количество
+        SELECT Заказ.id, Заказ.дата, Заказ.клиент,
+               Товар.модель, Состав_заказа.количество
         FROM Заказ
-        JOIN Товар ON Товар.id = Заказ.товар_id
+        JOIN Состав_заказа ON Состав_заказа.заказ_id = Заказ.id
+        JOIN Товар ON Товар.id = Состав_заказа.товар_id
         ORDER BY Заказ.id DESC
     """)
     rows = cur.fetchall()
