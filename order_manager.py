@@ -186,3 +186,39 @@ def delete_order(order_id):
         return False
     finally:
         conn.close()
+
+def update_product(product_id, name, price, quantity):
+    """Обновляет данные товара."""
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE Товар
+            SET модель = ?, цена = ?, количество = ?
+            WHERE id = ?
+        """, (name, price, quantity, product_id))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Ошибка обновления товара: {e}")
+        return False
+    finally:
+        conn.close()
+
+
+def update_order_item(item_id, quantity):
+    """Обновляет количество в позиции заказа."""
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("UPDATE Состав_заказа SET количество = ? WHERE id = ?",
+                    (quantity, item_id))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Ошибка обновления позиции: {e}")
+        return False
+    finally:
+        conn.close()
