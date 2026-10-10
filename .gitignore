@@ -56,4 +56,4 @@ credentials.txt
 ~$*.xlsx
 
 # SQLite journal
-*.db-journal
+*.db-journalworkbook/
